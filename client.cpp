@@ -7,6 +7,9 @@
 #include "common.h"
 #include "FIFOreqchannel.h"
 #include <stdio.h>
+#include <sys/wait.h>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -15,6 +18,19 @@ int main(int argc, char *argv[]){
     int n = 100;    // default number of requests per "patient"
 	int p = 15;		// number of patients
     srand(time_t(NULL));
+
+    // part 4 
+    // for calling ./dataserver (part 4)
+    char* args[2];
+    args[0] = "./dataserver";
+    args[1] = NULL;
+
+    // child process
+    if(fork()==0)
+    {
+        // execute ./dataserver
+        execv(args[0], args);
+    }
 
     FIFORequestChannel chan ("control", FIFORequestChannel::CLIENT_SIDE);
 
@@ -30,12 +46,12 @@ int main(int argc, char *argv[]){
     // double ecgVal;
     // double unitTime = 0.004;
 
-    // freopen("./received/x1.csv", "w", stdout);
+    // ofstream oFile("./received/x1.csv");
 
     // for(double i = 0; time < 59.996; i++){
     // // write the time to a file
     //     time = unitTime*i;
-    //     cout << time << ",";
+    //     oFile << time << ",";
 
     // // creates new data request
     //     datamsg* ecg1 = new datamsg(1, time, 1);
@@ -47,16 +63,16 @@ int main(int argc, char *argv[]){
     // // stores data received from server in char*
     //     char* ecg1_response = chan.cread();
     //     ecgVal = *(double*) ecg1_response;
-    //     cout << ecgVal << ",";
+    //     oFile << ecgVal << ",";
 
     // // same steps for eg2
     //     chan.cwrite(ecg2, sizeof(datamsg));
     //     char* ecg2_response = chan.cread();
     //     ecgVal = *(double*) ecg2_response;
 
-    //     cout << ecgVal << endl;
+    //     oFile << ecgVal << endl;
     // }
-    // fclose(stdout);
+    // oFile.close();
 
     // COMPARE FILES & DO TIME OF DAY THING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -81,7 +97,7 @@ int main(int argc, char *argv[]){
 
     // // Get packets of size 256MB and print to .csv file
 
-    // freopen("./received/y1.csv", "w", stdout); //  prompt to write to new .csv file
+    // ofstream oFile("./received/y1.csv");
 
     // __int64_t size = *(__int64_t*)response;
 
@@ -106,9 +122,10 @@ int main(int argc, char *argv[]){
     //     chan.cwrite(requestArr, sizeof(filemsg) + fileName.length() + 1);
     //     response = chan.cread();
     //     cout << response;
+    //     oFile << response;
     // }
 
-    // fclose(stdout);
+    // oFile.close();
 
     // -------------- part 3 --------------------
 
@@ -116,7 +133,6 @@ int main(int argc, char *argv[]){
     // chan.cwrite(&channelReq, sizeof(MESSAGE_TYPE));
     // char* message_response = chan.cread();
     // FIFORequestChannel chan2 (message_response, FIFORequestChannel::CLIENT_SIDE);
-
 
     // double ecgValDemo;
 
@@ -160,23 +176,20 @@ int main(int argc, char *argv[]){
 
     //---------------- part 4 ------------------
 
-    // // for calling ./dataserver
-    // char* args[2];
-    // args[0] = "./dataserver";
-    // args[1] = NULL;
+    // CODE FOR RUNNING ./dataserver IS AT TOP OF FILE (we need to run dataserver before we run client)
 
-    // // child process
-    // if(fork()==0)
-    // {
-    //     execv(args[0], args);
-    // }
+    // datamsg* msg = new datamsg(1, 0, 1);
+    // chan.cwrite(msg, sizeof(datamsg));
+    // char* resp = chan.cread();
 
+    // double string = *(double*) resp;
+    // cout << string;
 
+    // -------------- part 5 -------------------
 
-    // closing the channel    
+    // closing the channel
     MESSAGE_TYPE m = QUIT_MSG;
-    chan2.cwrite (&m, sizeof (MESSAGE_TYPE));
+    //chan2.cwrite (&m, sizeof (MESSAGE_TYPE));
     chan.cwrite (&m, sizeof (MESSAGE_TYPE));
-
-   
+    wait(NULL);
 }
