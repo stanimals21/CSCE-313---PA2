@@ -62,7 +62,7 @@ int main(int argc, char *argv[]){
 
 
 
-    // ----------------- part 2 ----------------- 
+    // ----------------- part 2 ----------------- // DO TRUNCATING AND DIFF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     // string fileName = "1.csv";
     // const char* fileString = fileName.c_str();
@@ -117,37 +117,46 @@ int main(int argc, char *argv[]){
     // char* message_response = chan.cread();
     // FIFORequestChannel chan2 (message_response, FIFORequestChannel::CLIENT_SIDE);
 
-    // double time = 0;
-    // double ecgVal;
-    // double unitTime = 0.004;
 
-    // freopen("./received/x1.csv", "w", stdout);
-
-    // for(double i = 0; time < 59.996; i++){
-    // // write the time to a file
-    //     time = unitTime*i;
-    //     cout << time << ",";
+    // double ecgValDemo;
 
     // // creates new data request
-    //     datamsg* ecg1 = new datamsg(1, time, 1);
-    //     datamsg* ecg2 = new datamsg(1, time, 2);
+    //     cout << 0 << ", ";
+    //     datamsg* ecg1 = new datamsg(1, 0, 1);
+    //     datamsg* ecg2 = new datamsg(1, 0, 2);
 
     // // writes data request to channel chan
     //     chan2.cwrite(ecg1, sizeof(datamsg));
 
     // // stores data received from server in char*
     //     char* ecg1_response = chan2.cread();
-    //     ecgVal = *(double*) ecg1_response;
-    //     cout << ecgVal << ",";
+    //     ecgValDemo = *(double*) ecg1_response;
+    //     cout << ecgValDemo << ",";
 
     // // same steps for eg2
     //     chan2.cwrite(ecg2, sizeof(datamsg));
     //     char* ecg2_response = chan2.cread();
-    //     ecgVal = *(double*) ecg2_response;
+    //     ecgValDemo = *(double*) ecg2_response;
 
-    //     cout << ecgVal << endl;
-    // }
-    // fclose(stdout);
+    //     cout << ecgValDemo << endl;
+
+
+    // // Second Data point
+
+    // cout << 0.08 << ", ";
+    // ecg1 = new datamsg(1, 0.08, 1);
+    // ecg2 = new datamsg(1, 0.08, 2);
+    // chan2.cwrite(ecg1, sizeof(datamsg));
+
+    // ecg1_response = chan2.cread();
+    // ecgValDemo = *(double*) ecg1_response;
+    // cout << ecgValDemo << ",";
+
+    // chan2.cwrite(ecg2, sizeof(datamsg));
+    // ecg2_response = chan2.cread();
+    // ecgValDemo = *(double*) ecg2_response;
+
+    // cout << ecgValDemo << endl;
 
     //---------------- part 4 ------------------
 
@@ -166,7 +175,7 @@ int main(int argc, char *argv[]){
 
     // closing the channel    
     MESSAGE_TYPE m = QUIT_MSG;
-    //chan2.cwrite (&m, sizeof (MESSAGE_TYPE));
+    chan2.cwrite (&m, sizeof (MESSAGE_TYPE));
     chan.cwrite (&m, sizeof (MESSAGE_TYPE));
 
    
