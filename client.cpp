@@ -88,32 +88,21 @@ int main(int argc, char *argv[]){
 
 
     // find number of requests to make
-    int packetSize = 256;
+    int packetSize = 100;
     int iters = size / packetSize;
 
     // request multiple packets
     int i;
-    for(i = 0; i < iters; i++)
+    for(i = 0; i <= iters; i++)
     {
-        msg = new filemsg(i*256, packetSize);
-        memcpy(requestArr, msg, sizeof(filemsg)); // replaces msg with new one
-        chan.cwrite(requestArr, sizeof(filemsg) + fileName.length() + 1);
-        response = chan.cread();
-        cout << response;
-    }
-
-    // check end condition
-    if(size % packetSize != 0 && i == iters)
-    {
-        msg = new filemsg(i*packetSize, size % packetSize);
-        memcpy(requestArr, msg, sizeof(filemsg)); // replaces msg with new one
-        chan.cwrite(requestArr, sizeof(filemsg) + fileName.length() + 1);
-        response = chan.cread();
-        cout << response;
-    }
-    else // if packetSize divides evenly.
-    {
-        msg = new filemsg(i*packetSize, 256);
+        if(size % packetSize !=0 && i == iters)
+        {
+            msg = new filemsg(i*packetSize, size % packetSize);
+        }
+        else
+        {
+            msg = new filemsg(i*packetSize, packetSize);
+        }
         memcpy(requestArr, msg, sizeof(filemsg)); // replaces msg with new one
         chan.cwrite(requestArr, sizeof(filemsg) + fileName.length() + 1);
         response = chan.cread();
