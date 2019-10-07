@@ -21,7 +21,7 @@ int main(int argc, char *argv[]){
 
     // source: https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html#Example-of-Getopt
     int opt;
-    while((opt = getopt(argc, argv, "p:t:e:c:f:")) != -1)  
+    while((opt = getopt(argc, argv, "p:t:e:cf:")) != -1)  
     {  
         switch(opt)
         {
@@ -142,6 +142,7 @@ int main(int argc, char *argv[]){
     // ----------------- part 2 ----------------- 
     if(f != "")
     {
+        struct timeval start, end;
         string fileName = f; 
         const char* fileString = fileName.c_str();
 
@@ -167,7 +168,6 @@ int main(int argc, char *argv[]){
         // find number of requests to make
         int packetSize = 256;
         int iters = size / packetSize;
-        struct timeval start, end;
 
         // request multiple packets
         int i;
@@ -193,12 +193,12 @@ int main(int argc, char *argv[]){
             }
             else
             {
-                oFile.write(response,256);
+                oFile.write(response, packetSize);
             }
         }
         gettimeofday(&end, NULL);
-        double elapsedTime = (end.tv_sec - start.tv_sec) + ((end.tv_usec - start.tv_usec)*1e-6);
-        cout << "The time elapsed is: " << elapsedTime << "s" <<endl << endl;
+        double elapsedTime2 = (end.tv_sec - start.tv_sec) + ((end.tv_usec - start.tv_usec)*1e-6);
+        cout << "The time elapsed is: " << elapsedTime2 << "s" <<endl << endl;
         oFile.close();
     }
 
@@ -234,7 +234,6 @@ int main(int argc, char *argv[]){
 
             cout << ecgValDemo << endl;
 
-
         // Second Data point
         cout << 0.08 << ", ";
         ecg1 = new datamsg(1, 0.08, 1);
@@ -250,6 +249,8 @@ int main(int argc, char *argv[]){
         ecgValDemo = *(double*) ecg2_response;
 
         cout << ecgValDemo << endl;
+        MESSAGE_TYPE m = QUIT_MSG;
+        chan2.cwrite (&m, sizeof (MESSAGE_TYPE));
     }
 
 
@@ -269,7 +270,6 @@ int main(int argc, char *argv[]){
 
     // closing the channel
     MESSAGE_TYPE m = QUIT_MSG;
-    //chan2.cwrite (&m, sizeof (MESSAGE_TYPE));
     chan.cwrite (&m, sizeof (MESSAGE_TYPE));
     //end of program
     wait(NULL);
