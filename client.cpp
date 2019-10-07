@@ -18,11 +18,11 @@ int main(int argc, char *argv[]){
 
     // int n = 100;    // default number of requests per "patient"
 	// int p = 15;		// number of patients
-    // int t = 0;
-    // int e = 0;
-    // int c = 0;
-    // int f = 0;
-    // srand(time_t(NULL));
+    int t = 0;
+    int e = 0;
+    int c = 0;
+    int f = 0;
+    srand(time_t(NULL));
 
     // // source: https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html#Example-of-Getopt
     // int opt;
@@ -64,46 +64,46 @@ int main(int argc, char *argv[]){
 
     // // ----------------- part 1 -----------------
 
-    // to calculate runtime
-    struct timeval start, end;
+    // // to calculate runtime
+    // struct timeval start, end;
 
-    double time = 0;
-    double ecgVal;
-    double unitTime = 0.004;
+    // double time = 0;
+    // double ecgVal;
+    // double unitTime = 0.004;
 
-    ofstream oFile("./received/x1.csv");
-    gettimeofday(&start, NULL);
+    // ofstream oFile("./received/x1.csv");
+    // gettimeofday(&start, NULL);
 
-    for(double i = 0; time < 59.996; i++){
-    // write the time to a file
-        time = unitTime*i;
-        oFile << time << ",";
+    // for(double i = 0; time < 59.996; i++){
+    // // write the time to a file
+    //     time = unitTime*i;
+    //     oFile << time << ",";
 
-    // creates new data request
-        datamsg* ecg1 = new datamsg(1, time, 1);
-        datamsg* ecg2 = new datamsg(1, time, 2);
+    // // creates new data request
+    //     datamsg* ecg1 = new datamsg(1, time, 1);
+    //     datamsg* ecg2 = new datamsg(1, time, 2);
 
-    // writes data request to channel chan
-        chan.cwrite(ecg1, sizeof(datamsg));
+    // // writes data request to channel chan
+    //     chan.cwrite(ecg1, sizeof(datamsg));
 
-    // stores data received from server in char*
-        char* ecg1_response = chan.cread();
-        ecgVal = *(double*) ecg1_response;
-        oFile << ecgVal << ",";
+    // // stores data received from server in char*
+    //     char* ecg1_response = chan.cread();
+    //     ecgVal = *(double*) ecg1_response;
+    //     oFile << ecgVal << ",";
 
-    // same steps for eg2
-        chan.cwrite(ecg2, sizeof(datamsg));
-        char* ecg2_response = chan.cread();
-        ecgVal = *(double*) ecg2_response;
+    // // same steps for eg2
+    //     chan.cwrite(ecg2, sizeof(datamsg));
+    //     char* ecg2_response = chan.cread();
+    //     ecgVal = *(double*) ecg2_response;
 
-        oFile << ecgVal << endl;
-    }
+    //     oFile << ecgVal << endl;
+    // }
 
-    gettimeofday(&end, NULL);
-    oFile.close();
+    // gettimeofday(&end, NULL);
+    // oFile.close();
 
-    double elapsedTime = ((start.tv_sec - end.tv_sec)*1e6) + ((end.tv_usec - start.tv_usec)*1e-6);
-    cout << "The time elapsed is: " << elapsedTime << endl;
+    // double elapsedTime = (end.tv_sec - start.tv_sec) + ((end.tv_usec - start.tv_usec)*1e-6);
+    // cout << "The time elapsed is: " << elapsedTime << "s" <<endl;
 
     // COMPARE FILES & DO TIME OF DAY THING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // comparing files diff -s <path to first file> <path to second file> (works)
