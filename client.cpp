@@ -21,7 +21,6 @@ int main(int argc, char *argv[]){
 
     // source: https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html#Example-of-Getopt
     int opt;
-
     while((opt = getopt(argc, argv, "p:t:e:c:f:")) != -1)  
     {  
         switch(opt)
@@ -121,62 +120,80 @@ int main(int argc, char *argv[]){
         oFile.close();
 
         double elapsedTime = (end.tv_sec - start.tv_sec) + ((end.tv_usec - start.tv_usec)*1e-6);
-        cout << "The time elapsed is: " << elapsedTime << "s" <<endl;
+        cout << "The time elapsed is: " << elapsedTime << "s" <<endl << endl;
+    }
+
+    if(p!=-1 && t !=-1 && e !=-1)
+    {
+        struct timeval start, end;
+
+        datamsg* pointMsg = new datamsg(p, t, e);
+        chan.cwrite(pointMsg, sizeof(datamsg));
+        char* dataPoint = chan.cread();
+
+        cout << "Data Point: " << endl;
+        cout << *(double*) dataPoint<< endl;
+        
+        double elapsedTime = (end.tv_sec - start.tv_sec) + ((end.tv_usec - start.tv_usec)*1e-6);
+        cout << "The time elapsed is: " << elapsedTime << "s" <<endl << endl;
     }
 
 
     // ----------------- part 2 ----------------- // DO TRUNCATING AND DIFF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if(f != "")
+    {
+        string fileName = f;
+        const char* fileString = fileName.c_str();
 
-    // string fileName = "1.csv";
-    // const char* fileString = fileName.c_str();
+        // prepare request array to be sent to server for FileSize
+        char* requestArr = new char[sizeof(filemsg) + fileName.length() + 1];
 
-    // // prepare request array to be sent to server for FileSize
-    // char* requestArr = new char[sizeof(filemsg) + fileName.length() + 1];
+        filemsg* msg = new filemsg(0, 0);
 
-    // filemsg* msg = new filemsg(0, 0);
+        memcpy(requestArr, msg, sizeof(filemsg));
+        strcpy(requestArr + sizeof(filemsg), fileString);
 
-    // memcpy(requestArr, msg, sizeof(filemsg));
-    // strcpy(requestArr + sizeof(filemsg), fileString);
+        chan.cwrite(requestArr, sizeof(filemsg) + fileName.length() + 1);
 
-    // chan.cwrite(requestArr, sizeof(filemsg) + fileName.length() + 1);
+        char* response = chan.cread();
 
-    // char* response = chan.cread();
+        // Get packets of size 256MB and print to .csv file
 
-    // // Get packets of size 256MB and print to .csv file
+        ofstream oFile("./received/y1.csv");
 
-    // ofstream oFile("./received/y1.csv");
-
-    // __int64_t size = *(__int64_t*)response;
+        __int64_t size = *(__int64_t*)response;
 
 
-    // // find number of requests to make
-    // int packetSize = 255;
-    // int iters = size / packetSize;
-    // struct timeval start, end;
+        // find number of requests to make
+        int packetSize = 255;
+        int iters = size / packetSize;
+        struct timeval start, end;
 
-    // // request multiple packets
-    // int i;
-    // for(i = 0; i <= iters; i++)
-    // {
-    //     gettimeofday(&start, NULL);
-    //     if(size % packetSize !=0 && i == iters)
-    //     {
-    //         msg = new filemsg(i*packetSize, size % packetSize);
-    //     }
-    //     else
-    //     {
-    //         msg = new filemsg(i*packetSize, packetSize);
-    //     }
-    //     memcpy(requestArr, msg, sizeof(filemsg)); // replaces msg with new one
-    //     chan.cwrite(requestArr, sizeof(filemsg) + fileName.length() + 1);
-    //     response = chan.cread();
-    //     oFile << response;
-    // }
-    // gettimeofday(&end, NULL);
-    // double elapsedTime = ((start.tv_sec - end.tv_sec)*1e6) + ((end.tv_usec - start.tv_usec)*1e-6);
-    // cout << elapsedTime << endl;
+        // request multiple packets
+        int i;
+        for(i = 0; i <= iters; i++)
+        {
+            gettimeofday(&start, NULL);
+            if(size % packetSize !=0 && i == iters)
+            {
+                msg = new filemsg(i*packetSize, size % packetSize);
+            }
+            else
+            {
+                msg = new filemsg(i*packetSize, packetSize);
+            }
+            memcpy(requestArr, msg, sizeof(filemsg)); // replaces msg with new one
+            chan.cwrite(requestArr, sizeof(filemsg) + fileName.length() + 1);
+            response = chan.cread();
+            oFile << response;
+        }
+        gettimeofday(&end, NULL);
+        double elapsedTime = ((start.tv_sec - end.tv_sec)*1e6) + ((end.tv_usec - start.tv_usec)*1e-6);
+        cout << elapsedTime << endl;
 
-    // oFile.close();
+        oFile.close();
+    }
+
 
     // -------------- part 3 --------------------
 
