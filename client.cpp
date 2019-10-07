@@ -88,7 +88,8 @@ int main(int argc, char *argv[]){
         double ecgVal;
         double unitTime = 0.004;
 
-        ofstream oFile("./received/x1.csv");
+        string writeData = "./received/x" + to_string(p) + ".csv";
+        ofstream oFile(writeData);
         gettimeofday(&start, NULL);
 
         for(double i = 0; time < 59.996; i++){
@@ -138,7 +139,6 @@ int main(int argc, char *argv[]){
         cout << "The time elapsed is: " << elapsedTime << "s" <<endl << endl;
     }
 
-
     // ----------------- part 2 ----------------- // DO TRUNCATING AND DIFF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if(f != "")
     {
@@ -158,8 +158,8 @@ int main(int argc, char *argv[]){
         char* response = chan.cread();
 
         // Get packets of size 256MB and print to .csv file
-
-        ofstream oFile("./received/y1.csv");
+        string writeFile = "./received/y" + f;
+        ofstream oFile(writeFile);
 
         __int64_t size = *(__int64_t*)response;
 
@@ -189,11 +189,9 @@ int main(int argc, char *argv[]){
         }
         gettimeofday(&end, NULL);
         double elapsedTime = ((start.tv_sec - end.tv_sec)*1e6) + ((end.tv_usec - start.tv_usec)*1e-6);
-        cout << elapsedTime << endl;
-
+        cout << elapsedTime << endl << endl;
         oFile.close();
     }
-
 
     // -------------- part 3 --------------------
 
