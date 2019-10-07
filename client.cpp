@@ -168,32 +168,40 @@ int main(int argc, char *argv[]){
         // find number of requests to make
         int packetSize = 256;
         int iters = size / packetSize;
+        int endCase = size % packetSize;
 
         // request multiple packets
         int i;
+        gettimeofday(&start, NULL);
         for(i = 0; i <= iters; i++)
         {
-            gettimeofday(&start, NULL);
+            if(size <= i*packetSize)
+            {
+                break;
+            }
             if(size % packetSize !=0 && i == iters)
             {
-                msg = new filemsg(i*packetSize, size % packetSize);
+                msg = new filemsg(i*packetSize, endCase);
+                // cout << "edge case " << i*packetSize << " " << endCase << endl;
             }
             else
             {
                 msg = new filemsg(i*packetSize, packetSize);
+                // cout << "normal case " << i*packetSize << " " << packetSize << endl;
             }
             memcpy(requestArr, msg, sizeof(filemsg)); // replaces msg with new one
             chan.cwrite(requestArr, sizeof(filemsg) + fileName.length() + 1);
             response = chan.cread();
             
-            // for mak
             if(size % packetSize !=0 && i == iters)
             {
                 oFile.write(response, size % packetSize);
+                cout << "edge " << size % packetSize << endl;
             }
             else
             {
                 oFile.write(response, packetSize);
+                cout << "normal " << packetSize << endl;
             }
         }
         gettimeofday(&end, NULL);
