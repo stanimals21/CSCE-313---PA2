@@ -1,9 +1,3 @@
-/*
-    Tanzir Ahmed
-    Department of Computer Science & Engineering
-    Texas A&M University
-    Date  : 2/8/19
- */
 #include "common.h"
 #include "FIFOreqchannel.h"
 #include <stdio.h>
@@ -13,36 +7,65 @@
 
 using namespace std;
 
-
 int main(int argc, char *argv[]){
 
     // int n = 100;    // default number of requests per "patient"
-	// int p = 15;		// number of patients
-    int t = 0;
-    int e = 0;
-    int c = 0;
-    int f = 0;
+	// int p = 15;
+
+    int p = -1;
+    double t = -1;
+    int e = -1;
+    int c = -1;
+    string f = "";
     srand(time_t(NULL));
 
-    // // source: https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html#Example-of-Getopt
-    // int opt;
+    // source: https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html#Example-of-Getopt
+    int opt;
 
-    // while((opt = getopt(argc, argv, "ptecf")) != -1)  
-    // {  
-    //     if((char)opt == 'b'){
-    //         stoi(optarg);
-    //     }
-    //     else if ((char)opt == 's'){
-    //         stoi(optarg); 
-    //     }
-    //     else{
-    //         cout << "Invalid input: please use tags -b or -s." << endl;
-    //     return 0;
-    //     }
-    // }  
+    while((opt = getopt(argc, argv, "p:t:e:c:f:")) != -1)  
+    {  
+        switch(opt)
+        {
+            case 'p':
+                if(optarg){
+                    if(stoi(optarg) >= 1  && stoi(optarg) <= 15){
+                        p = stoi(optarg);
+                    }
+                }
+                break;
+            case 't':
+                if(optarg){
+                    if (stoi(optarg) <= 59.99 && stoi(optarg) >= 0 && (int)(stoi(optarg)*1000) % 4 == 0)
+                    {
+                        t = stod(optarg);
+                    }
+                }
+                break;
+            case 'e':
+                if(optarg){
+                    if(stoi(optarg) == 1 || stoi(optarg) == 2)
+                    {
+                        e = stoi(optarg);
+                    }
+                }
+                break;
+            case 'c':
+                c = 1;
+                break;
+            case 'f':
+                if(optarg) {
+                    // check to see if file is in directory?? (fstream might handle it)
+                    if(optarg)
+                    {
+                        f = optarg;
+                    }
+                }
+                break;
+            default:
+                abort();
+        }
+    }
 
-    // --------------- part 4 (sub)-------------------
-    // for calling ./dataserver (part 4)
     char* args[2];
     args[0] = "./dataserver";
     args[1] = NULL;
@@ -56,58 +79,50 @@ int main(int argc, char *argv[]){
 
     FIFORequestChannel chan ("control", FIFORequestChannel::CLIENT_SIDE);
 
-    // sending a non-sense message, you need to change this
-    // char x = 55;
-    // chan.cwrite (&x, sizeof (x));
-    // char* buf = chan.cread ();
+    // ----------------- part 1 ----------------- comparing files diff -s <path to first file> <path to second file> (works)
+    if(p!= -1 && (t==-1 || e==-1))
+    {
+        // to calculate runtime
+        struct timeval start, end;
 
+        double time = 0;
+        double ecgVal;
+        double unitTime = 0.004;
 
-    // // ----------------- part 1 -----------------
+        ofstream oFile("./received/x1.csv");
+        gettimeofday(&start, NULL);
 
-    // // to calculate runtime
-    // struct timeval start, end;
+        for(double i = 0; time < 59.996; i++){
+        // write the time to a file
+            time = unitTime*i;
+            oFile << time << ",";
 
-    // double time = 0;
-    // double ecgVal;
-    // double unitTime = 0.004;
+        // creates new data request
+            datamsg* ecg1 = new datamsg(1, time, 1);
+            datamsg* ecg2 = new datamsg(1, time, 2);
 
-    // ofstream oFile("./received/x1.csv");
-    // gettimeofday(&start, NULL);
+        // writes data request to channel chan
+            chan.cwrite(ecg1, sizeof(datamsg));
 
-    // for(double i = 0; time < 59.996; i++){
-    // // write the time to a file
-    //     time = unitTime*i;
-    //     oFile << time << ",";
+        // stores data received from server in char*
+            char* ecg1_response = chan.cread();
+            ecgVal = *(double*) ecg1_response;
+            oFile << ecgVal << ",";
 
-    // // creates new data request
-    //     datamsg* ecg1 = new datamsg(1, time, 1);
-    //     datamsg* ecg2 = new datamsg(1, time, 2);
+        // same steps for eg2
+            chan.cwrite(ecg2, sizeof(datamsg));
+            char* ecg2_response = chan.cread();
+            ecgVal = *(double*) ecg2_response;
 
-    // // writes data request to channel chan
-    //     chan.cwrite(ecg1, sizeof(datamsg));
+            oFile << ecgVal << endl;
+        }
 
-    // // stores data received from server in char*
-    //     char* ecg1_response = chan.cread();
-    //     ecgVal = *(double*) ecg1_response;
-    //     oFile << ecgVal << ",";
+        gettimeofday(&end, NULL);
+        oFile.close();
 
-    // // same steps for eg2
-    //     chan.cwrite(ecg2, sizeof(datamsg));
-    //     char* ecg2_response = chan.cread();
-    //     ecgVal = *(double*) ecg2_response;
-
-    //     oFile << ecgVal << endl;
-    // }
-
-    // gettimeofday(&end, NULL);
-    // oFile.close();
-
-    // double elapsedTime = (end.tv_sec - start.tv_sec) + ((end.tv_usec - start.tv_usec)*1e-6);
-    // cout << "The time elapsed is: " << elapsedTime << "s" <<endl;
-
-    // COMPARE FILES & DO TIME OF DAY THING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // comparing files diff -s <path to first file> <path to second file> (works)
-
+        double elapsedTime = (end.tv_sec - start.tv_sec) + ((end.tv_usec - start.tv_usec)*1e-6);
+        cout << "The time elapsed is: " << elapsedTime << "s" <<endl;
+    }
 
 
     // ----------------- part 2 ----------------- // DO TRUNCATING AND DIFF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -214,12 +229,12 @@ int main(int argc, char *argv[]){
 
     //CODE FOR RUNNING ./dataserver IS AT TOP OF FILE (we need to run dataserver before we run client)
 
-    datamsg* msg = new datamsg(1, 0, 1);
-    chan.cwrite(msg, sizeof(datamsg));
-    char* resp = chan.cread();
+    // datamsg* msg = new datamsg(1, 0, 1);
+    // chan.cwrite(msg, sizeof(datamsg));
+    // char* resp = chan.cread();
 
-    double string = *(double*) resp;
-    cout << string;
+    // double string = *(double*) resp;
+    // cout << string;
 
     // -------------- part 5 -------------------
 
