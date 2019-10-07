@@ -205,6 +205,8 @@ int main(int argc, char *argv[]){
     // -------------- part 3 --------------------
     if(c != -1)
     {
+        struct timeval start, end;
+
         MESSAGE_TYPE channelReq = NEWCHANNEL_MSG;
         chan.cwrite(&channelReq, sizeof(MESSAGE_TYPE));
         char* message_response = chan.cread();
@@ -214,59 +216,55 @@ int main(int argc, char *argv[]){
         cout << "Test values for new channel: " << endl;
         double ecgValDemo;
 
+        gettimeofday(&start, NULL);
+
         // creates new data request
-            cout << 0 << ", ";
-            datamsg* ecg1 = new datamsg(1, 0, 1);
-            datamsg* ecg2 = new datamsg(1, 0, 2);
+        cout << 0 << ", ";
+        datamsg* ecg1 = new datamsg(1, 0, 1);
+        // datamsg* ecg2 = new datamsg(1, 0, 2);
 
         // writes data request to channel chan
-            chan2.cwrite(ecg1, sizeof(datamsg));
-
-        // stores data received from server in char*
-            char* ecg1_response = chan2.cread();
-            ecgValDemo = *(double*) ecg1_response;
-            cout << ecgValDemo << ",";
-
-        // same steps for eg2
-            chan2.cwrite(ecg2, sizeof(datamsg));
-            char* ecg2_response = chan2.cread();
-            ecgValDemo = *(double*) ecg2_response;
-
-            cout << ecgValDemo << endl;
-
-        // Second Data point
-        cout << 0.08 << ", ";
-        ecg1 = new datamsg(1, 0.08, 1);
-        ecg2 = new datamsg(1, 0.08, 2);
         chan2.cwrite(ecg1, sizeof(datamsg));
 
-        ecg1_response = chan2.cread();
+        // stores data received from server in char*
+        char* ecg1_response = chan2.cread();
         ecgValDemo = *(double*) ecg1_response;
         cout << ecgValDemo << ",";
 
-        chan2.cwrite(ecg2, sizeof(datamsg));
-        ecg2_response = chan2.cread();
-        ecgValDemo = *(double*) ecg2_response;
+        // // same steps for eg2
+        // chan2.cwrite(ecg2, sizeof(datamsg));
+        // char* ecg2_response = chan2.cread();
+        // ecgValDemo = *(double*) ecg2_response;
+
+        // cout << ecgValDemo << endl;
+
+        // // Second Data point
+        // cout << 0.08 << ", ";
+        // ecg1 = new datamsg(1, 0.08, 1);
+        // ecg2 = new datamsg(1, 0.08, 2);
+        // chan2.cwrite(ecg1, sizeof(datamsg));
+
+        // ecg1_response = chan2.cread();
+        // ecgValDemo = *(double*) ecg1_response;
+        // cout << ecgValDemo << ",";
+
+        // chan2.cwrite(ecg2, sizeof(datamsg));
+        // ecg2_response = chan2.cread();
+        // ecgValDemo = *(double*) ecg2_response;
 
         cout << ecgValDemo << endl;
+
+        gettimeofday(&end, NULL);
+
+        double elapsedTime2 = (end.tv_sec - start.tv_sec) + ((end.tv_usec - start.tv_usec)*1e-6);
+        cout << "The time elapsed is: " << elapsedTime2 << "s" <<endl << endl;
+
+        // closing the new channel
         MESSAGE_TYPE m = QUIT_MSG;
         chan2.cwrite (&m, sizeof (MESSAGE_TYPE));
     }
 
-
-    //---------------- part 4 ------------------
-
-    //CODE FOR RUNNING ./dataserver IS AT TOP OF FILE (we need to run dataserver before we run client)
-
-    // datamsg* msg = new datamsg(1, 0, 1);
-    // chan.cwrite(msg, sizeof(datamsg));
-    // char* resp = chan.cread();
-
-    // double string = *(double*) resp;
-    // cout << string;
-
     // -------------- part 5 -------------------
-
 
     // closing the channel
     MESSAGE_TYPE m = QUIT_MSG;
