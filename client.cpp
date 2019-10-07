@@ -15,11 +15,33 @@ using namespace std;
 
 
 int main(int argc, char *argv[]){
-    int n = 100;    // default number of requests per "patient"
-	int p = 15;		// number of patients
-    srand(time_t(NULL));
 
-    // part 4 
+    // int n = 100;    // default number of requests per "patient"
+	// int p = 15;		// number of patients
+    // int t = 0;
+    // int e = 0;
+    // int c = 0;
+    // int f = 0;
+    // srand(time_t(NULL));
+
+    // // source: https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html#Example-of-Getopt
+    // int opt;
+
+    // while((opt = getopt(argc, argv, "ptecf")) != -1)  
+    // {  
+    //     if((char)opt == 'b'){
+    //         stoi(optarg);
+    //     }
+    //     else if ((char)opt == 's'){
+    //         stoi(optarg); 
+    //     }
+    //     else{
+    //         cout << "Invalid input: please use tags -b or -s." << endl;
+    //     return 0;
+    //     }
+    // }  
+
+    // --------------- part 4 (sub)-------------------
     // for calling ./dataserver (part 4)
     char* args[2];
     args[0] = "./dataserver";
@@ -42,39 +64,49 @@ int main(int argc, char *argv[]){
 
     // // ----------------- part 1 -----------------
 
-    // double time = 0;
-    // double ecgVal;
-    // double unitTime = 0.004;
+    // to calculate runtime
+    struct timeval start, end;
 
-    // ofstream oFile("./received/x1.csv");
+    double time = 0;
+    double ecgVal;
+    double unitTime = 0.004;
 
-    // for(double i = 0; time < 59.996; i++){
-    // // write the time to a file
-    //     time = unitTime*i;
-    //     oFile << time << ",";
+    ofstream oFile("./received/x1.csv");
+    gettimeofday(&start, NULL);
 
-    // // creates new data request
-    //     datamsg* ecg1 = new datamsg(1, time, 1);
-    //     datamsg* ecg2 = new datamsg(1, time, 2);
+    for(double i = 0; time < 59.996; i++){
+    // write the time to a file
+        time = unitTime*i;
+        oFile << time << ",";
 
-    // // writes data request to channel chan
-    //     chan.cwrite(ecg1, sizeof(datamsg));
+    // creates new data request
+        datamsg* ecg1 = new datamsg(1, time, 1);
+        datamsg* ecg2 = new datamsg(1, time, 2);
 
-    // // stores data received from server in char*
-    //     char* ecg1_response = chan.cread();
-    //     ecgVal = *(double*) ecg1_response;
-    //     oFile << ecgVal << ",";
+    // writes data request to channel chan
+        chan.cwrite(ecg1, sizeof(datamsg));
 
-    // // same steps for eg2
-    //     chan.cwrite(ecg2, sizeof(datamsg));
-    //     char* ecg2_response = chan.cread();
-    //     ecgVal = *(double*) ecg2_response;
+    // stores data received from server in char*
+        char* ecg1_response = chan.cread();
+        ecgVal = *(double*) ecg1_response;
+        oFile << ecgVal << ",";
 
-    //     oFile << ecgVal << endl;
-    // }
-    // oFile.close();
+    // same steps for eg2
+        chan.cwrite(ecg2, sizeof(datamsg));
+        char* ecg2_response = chan.cread();
+        ecgVal = *(double*) ecg2_response;
+
+        oFile << ecgVal << endl;
+    }
+
+    gettimeofday(&end, NULL);
+    oFile.close();
+
+    double elapsedTime = ((start.tv_sec - end.tv_sec)*1e6) + ((end.tv_usec - start.tv_usec)*1e-6);
+    cout << "The time elapsed is: " << elapsedTime << endl;
 
     // COMPARE FILES & DO TIME OF DAY THING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // comparing files diff -s <path to first file> <path to second file> (works)
 
 
 
@@ -105,11 +137,13 @@ int main(int argc, char *argv[]){
     // // find number of requests to make
     // int packetSize = 255;
     // int iters = size / packetSize;
+    // struct timeval start, end;
 
     // // request multiple packets
     // int i;
     // for(i = 0; i <= iters; i++)
     // {
+    //     gettimeofday(&start, NULL);
     //     if(size % packetSize !=0 && i == iters)
     //     {
     //         msg = new filemsg(i*packetSize, size % packetSize);
@@ -121,9 +155,11 @@ int main(int argc, char *argv[]){
     //     memcpy(requestArr, msg, sizeof(filemsg)); // replaces msg with new one
     //     chan.cwrite(requestArr, sizeof(filemsg) + fileName.length() + 1);
     //     response = chan.cread();
-    //     cout << response;
     //     oFile << response;
     // }
+    // gettimeofday(&end, NULL);
+    // double elapsedTime = ((start.tv_sec - end.tv_sec)*1e6) + ((end.tv_usec - start.tv_usec)*1e-6);
+    // cout << elapsedTime << endl;
 
     // oFile.close();
 
@@ -176,20 +212,22 @@ int main(int argc, char *argv[]){
 
     //---------------- part 4 ------------------
 
-    // CODE FOR RUNNING ./dataserver IS AT TOP OF FILE (we need to run dataserver before we run client)
+    //CODE FOR RUNNING ./dataserver IS AT TOP OF FILE (we need to run dataserver before we run client)
 
-    // datamsg* msg = new datamsg(1, 0, 1);
-    // chan.cwrite(msg, sizeof(datamsg));
-    // char* resp = chan.cread();
+    datamsg* msg = new datamsg(1, 0, 1);
+    chan.cwrite(msg, sizeof(datamsg));
+    char* resp = chan.cread();
 
-    // double string = *(double*) resp;
-    // cout << string;
+    double string = *(double*) resp;
+    cout << string;
 
     // -------------- part 5 -------------------
+
 
     // closing the channel
     MESSAGE_TYPE m = QUIT_MSG;
     //chan2.cwrite (&m, sizeof (MESSAGE_TYPE));
     chan.cwrite (&m, sizeof (MESSAGE_TYPE));
+    //end of program
     wait(NULL);
 }
