@@ -139,10 +139,10 @@ int main(int argc, char *argv[]){
         cout << "The time elapsed is: " << elapsedTime << "s" <<endl << endl;
     }
 
-    // ----------------- part 2 ----------------- // DO TRUNCATING AND DIFF!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // ----------------- part 2 ----------------- 
     if(f != "")
     {
-        string fileName = f;
+        string fileName = f; 
         const char* fileString = fileName.c_str();
 
         // prepare request array to be sent to server for FileSize
@@ -165,7 +165,7 @@ int main(int argc, char *argv[]){
 
 
         // find number of requests to make
-        int packetSize = 255;
+        int packetSize = 256;
         int iters = size / packetSize;
         struct timeval start, end;
 
@@ -185,60 +185,73 @@ int main(int argc, char *argv[]){
             memcpy(requestArr, msg, sizeof(filemsg)); // replaces msg with new one
             chan.cwrite(requestArr, sizeof(filemsg) + fileName.length() + 1);
             response = chan.cread();
-            oFile << response;
+            
+            // for mak
+            if(size % packetSize !=0 && i == iters)
+            {
+                oFile.write(response, size % packetSize);
+            }
+            else
+            {
+                oFile.write(response,256);
+            }
         }
         gettimeofday(&end, NULL);
-        double elapsedTime = ((start.tv_sec - end.tv_sec)*1e6) + ((end.tv_usec - start.tv_usec)*1e-6);
-        cout << elapsedTime << endl << endl;
+        double elapsedTime = (end.tv_sec - start.tv_sec) + ((end.tv_usec - start.tv_usec)*1e-6);
+        cout << "The time elapsed is: " << elapsedTime << "s" <<endl << endl;
         oFile.close();
     }
 
     // -------------- part 3 --------------------
+    if(c != -1)
+    {
+        MESSAGE_TYPE channelReq = NEWCHANNEL_MSG;
+        chan.cwrite(&channelReq, sizeof(MESSAGE_TYPE));
+        char* message_response = chan.cread();
+        FIFORequestChannel chan2 (message_response, FIFORequestChannel::CLIENT_SIDE);
 
-    // MESSAGE_TYPE channelReq = NEWCHANNEL_MSG;
-    // chan.cwrite(&channelReq, sizeof(MESSAGE_TYPE));
-    // char* message_response = chan.cread();
-    // FIFORequestChannel chan2 (message_response, FIFORequestChannel::CLIENT_SIDE);
+        // Demonstration
+        cout << "Test values for new channel: " << endl;
+        double ecgValDemo;
 
-    // double ecgValDemo;
+        // creates new data request
+            cout << 0 << ", ";
+            datamsg* ecg1 = new datamsg(1, 0, 1);
+            datamsg* ecg2 = new datamsg(1, 0, 2);
 
-    // // creates new data request
-    //     cout << 0 << ", ";
-    //     datamsg* ecg1 = new datamsg(1, 0, 1);
-    //     datamsg* ecg2 = new datamsg(1, 0, 2);
+        // writes data request to channel chan
+            chan2.cwrite(ecg1, sizeof(datamsg));
 
-    // // writes data request to channel chan
-    //     chan2.cwrite(ecg1, sizeof(datamsg));
+        // stores data received from server in char*
+            char* ecg1_response = chan2.cread();
+            ecgValDemo = *(double*) ecg1_response;
+            cout << ecgValDemo << ",";
 
-    // // stores data received from server in char*
-    //     char* ecg1_response = chan2.cread();
-    //     ecgValDemo = *(double*) ecg1_response;
-    //     cout << ecgValDemo << ",";
+        // same steps for eg2
+            chan2.cwrite(ecg2, sizeof(datamsg));
+            char* ecg2_response = chan2.cread();
+            ecgValDemo = *(double*) ecg2_response;
 
-    // // same steps for eg2
-    //     chan2.cwrite(ecg2, sizeof(datamsg));
-    //     char* ecg2_response = chan2.cread();
-    //     ecgValDemo = *(double*) ecg2_response;
-
-    //     cout << ecgValDemo << endl;
+            cout << ecgValDemo << endl;
 
 
-    // // Second Data point
+        // Second Data point
+        cout << 0.08 << ", ";
+        ecg1 = new datamsg(1, 0.08, 1);
+        ecg2 = new datamsg(1, 0.08, 2);
+        chan2.cwrite(ecg1, sizeof(datamsg));
 
-    // cout << 0.08 << ", ";
-    // ecg1 = new datamsg(1, 0.08, 1);
-    // ecg2 = new datamsg(1, 0.08, 2);
-    // chan2.cwrite(ecg1, sizeof(datamsg));
+        ecg1_response = chan2.cread();
+        ecgValDemo = *(double*) ecg1_response;
+        cout << ecgValDemo << ",";
 
-    // ecg1_response = chan2.cread();
-    // ecgValDemo = *(double*) ecg1_response;
-    // cout << ecgValDemo << ",";
+        chan2.cwrite(ecg2, sizeof(datamsg));
+        ecg2_response = chan2.cread();
+        ecgValDemo = *(double*) ecg2_response;
 
-    // chan2.cwrite(ecg2, sizeof(datamsg));
-    // ecg2_response = chan2.cread();
-    // ecgValDemo = *(double*) ecg2_response;
+        cout << ecgValDemo << endl;
+    }
 
-    // cout << ecgValDemo << endl;
 
     //---------------- part 4 ------------------
 
